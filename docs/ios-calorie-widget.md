@@ -8,7 +8,7 @@ Android stores the same snapshot and has no widget UI yet. That work is tracked 
 
 Both the Runner target and the `CalorieWidget` extension use:
 
-`group.com.opennutritracker.ont.opennutritracker`
+`group.com.megdigital.GOCalorie`
 
 The extension bundle ids are:
 
@@ -30,7 +30,7 @@ The widget shows "Open the app" until that first write, and again after the conf
 
 App Store and TestFlight archives need the group and both extension bundle ids registered on the Apple Developer team that signs OpenNutriTracker (`DEVELOPMENT_TEAM` `79AJPC6DP3`).
 
-1. In Certificates, Identifiers & Profiles, create the App Group `group.com.opennutritracker.ont.opennutritracker` if it is not already there.
+1. In Certificates, Identifiers & Profiles, create the App Group `group.com.megdigital.GOCalorie` if it is not already there.
 2. Enable that App Group on the existing app ids (`com.opennutritracker.ont.opennutritracker` and the develop id).
 3. Register the two extension bundle ids and enable the same App Group on each.
 4. Regenerate the signing profiles (the project uses fastlane match for Release and Profile) so the new ids and the group are included. Debug stays on automatic signing.

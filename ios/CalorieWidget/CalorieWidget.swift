@@ -6,7 +6,7 @@ import WidgetKit
 /// take the local calendar day. When that day id no longer matches, the
 /// widget shows a placeholder instead of yesterday's intake.
 private enum CalorieWidgetKeys {
-    static let appGroupId = "group.com.opennutritracker.ont.opennutritracker"
+    static let appGroupId = "group.com.megdigital.GOCalorie"
     static let hasData = "ont_calorie_has_data"
     static let day = "ont_calorie_day"
     static let offset = "ont_calorie_offset_minutes"
@@ -190,7 +190,7 @@ struct CalorieProgressWidget: Widget {
         StaticConfiguration(kind: kind, provider: CalorieProvider()) { entry in
             CalorieWidgetView(entry: entry)
         }
-        .configurationDisplayName("Calories")
+        .configurationDisplayName("GO Calorie")
         .description("Today's calories eaten and your goal.")
         .supportedFamilies([.systemSmall])
     }

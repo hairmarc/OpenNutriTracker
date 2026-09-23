@@ -7,7 +7,7 @@ import 'package:opennutritracker/core/utils/calc/day_boundary_calc.dart';
 /// finishes loading. Kilocalories are the stored unit. The in-app
 /// kilojoule display preference is not applied here.
 class CalorieWidgetSnapshot {
-  static const appGroupId = 'group.com.opennutritracker.ont.opennutritracker';
+  static const appGroupId = 'group.com.megdigital.GOCalorie';
   static const iosWidgetKind = 'CalorieProgressWidget';
 
   static const hasDataKey = 'ont_calorie_has_data';
