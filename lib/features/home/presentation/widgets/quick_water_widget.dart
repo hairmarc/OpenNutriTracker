@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/log_water_dialog.dart';
@@ -28,43 +29,36 @@ class QuickWaterWidget extends StatelessWidget {
 
     return Semantics(
       identifier: 'home-water-chip',
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: Dimens.borderRadiusM,
-        child: InkWell(
-          borderRadius: Dimens.borderRadiusM,
-          onTap: () => _showDialog(context),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Dimens.spacing12,
-              vertical: Dimens.spacing8,
-            ),
-            decoration: BoxDecoration(
-              color: palette.surface,
-              borderRadius: Dimens.borderRadiusM,
-              border: Border.all(color: palette.border, width: Dimens.hairline),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.water_drop_rounded, size: 18, color: palette.protein),
-                const SizedBox(width: Dimens.spacing8),
-                Text(
-                  label,
-                  style: textTheme.labelLarge?.copyWith(
-                    color: palette.textStrong,
-                    fontWeight: FontWeight.w700,
-                  ),
+      child: AppCard(
+        onTap: () => _showDialog(context),
+        borderRadius: Dimens.radiusL,
+        padding: const EdgeInsets.symmetric(
+          horizontal: Dimens.spacing16,
+          vertical: Dimens.spacing12,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.water_drop_rounded, size: 20, color: palette.protein),
+            const SizedBox(width: Dimens.spacing8),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.titleSmall?.copyWith(
+                  color: palette.textStrong,
+                  fontWeight: FontWeight.w700,
                 ),
-                const SizedBox(width: Dimens.spacing4),
-                Semantics(
-                  identifier: 'home-water-edit',
-                  container: true,
-                  child: Icon(Icons.add_rounded, size: 18, color: accent),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: Dimens.spacing4),
+            Semantics(
+              identifier: 'home-water-edit',
+              container: true,
+              child: Icon(Icons.add_rounded, size: 18, color: accent),
+            ),
+          ],
         ),
       ),
     );

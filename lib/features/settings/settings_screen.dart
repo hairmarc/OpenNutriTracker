@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
+import 'package:opennutritracker/core/l10n/shipped_locales.dart';
 import 'package:opennutritracker/core/presentation/sources_screen.dart';
 import 'package:opennutritracker/core/presentation/widgets/app_banner_version.dart';
 import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
@@ -235,6 +236,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         : S.of(context).energyUnitKcalLabel,
                     onTap: () =>
                         _showEnergyUnitDialog(context, state.usesKilojoules),
+                  ),
+                  // #1126: opt out of the serving-first default so the
+                  // meal-detail dropdown lands on the food unit (g, oz,
+                  // ml, fl oz) straight away. Sits after Energy unit in
+                  // the Units & Energy group since it steers the same
+                  // meal-detail dropdown. Off preserves the pre-existing
+                  // behaviour — serving wins whenever the food has one.
+                  _SettingsSwitchTile(
+                    palette: palette,
+                    icon: Icons.straighten_rounded,
+                    title: S.of(context).settingsDefaultToRawFoodUnitsLabel,
+                    subtitle: S
+                        .of(context)
+                        .settingsDefaultToRawFoodUnitsSubtitle,
+                    value: state.defaultToRawFoodUnits,
+                    onChanged: (bool value) {
+                      _settingsBloc.setDefaultToRawFoodUnits(value);
+                      _settingsBloc.add(LoadSettingsEvent());
+                    },
                   ),
                 ],
               ),
@@ -1209,19 +1229,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  static const _supportedLocales = <String, String>{
-    'en': 'English',
-    'de': 'Deutsch',
-    'tr': 'Türkçe',
-    'cs': 'Čeština',
-    'it': 'Italiano',
-    'uk': 'Українська',
-    'zh': '中文',
-    'pl': 'Polski',
-    'sk': 'Slovenčina',
-  };
-
-  String? _localeDisplayName(String? code) => _supportedLocales[code];
+  String? _localeDisplayName(String? code) => shippedLocales[code];
 
   // Sentinel value meaning "follow system locale"
   static const _systemLocale = '';
@@ -1253,7 +1261,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           value: _systemLocale,
                         ),
-                        ..._supportedLocales.entries.map(
+                        ...shippedLocales.entries.map(
                           (e) => RadioListTile<String>(
                             title: Text(e.value),
                             value: e.key,
