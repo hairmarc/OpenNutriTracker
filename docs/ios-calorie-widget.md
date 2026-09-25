@@ -1,6 +1,6 @@
 # iOS calorie widget
 
-A small, read-only Home Screen widget shows today's calories eaten, the daily goal, and a progress ring. It reads an App Group snapshot written when Home finishes loading. It does not open the encrypted Hive database.
+A small, read-only Home Screen widget shows how many calories are left today. The ring matches the home card: green while calories remain, red when the day is over the goal, with an amber slice for calories offset by activity. Food and activity totals sit under the ring. It reads an App Group snapshot written when Home finishes loading. It does not open the encrypted Hive database. Activity kilocalories are stored as `ont_calorie_burned`.
 
 Android stores the same snapshot and has no widget UI yet. That work is tracked separately.
 

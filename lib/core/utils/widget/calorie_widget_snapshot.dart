@@ -14,12 +14,14 @@ class CalorieWidgetSnapshot {
   static const dayKey = 'ont_calorie_day';
   static const offsetKey = 'ont_calorie_offset_minutes';
   static const consumedKey = 'ont_calorie_consumed';
+  static const burnedKey = 'ont_calorie_burned';
   static const goalKey = 'ont_calorie_goal';
 
   final bool hasData;
   final String dayId;
   final int offsetMinutes;
   final int consumedKcal;
+  final int burnedKcal;
   final int goalKcal;
 
   const CalorieWidgetSnapshot({
@@ -27,18 +29,22 @@ class CalorieWidgetSnapshot {
     required this.dayId,
     required this.offsetMinutes,
     required this.consumedKcal,
+    required this.burnedKcal,
     required this.goalKcal,
   });
 
   /// Builds the snapshot Home should publish.
   ///
-  /// [consumedKcal] is today's supplied intake and [goalKcal] is the
-  /// daily goal, both already computed by Home. A goal of zero, or a
+  /// [consumedKcal] is today's supplied intake, [burnedKcal] is today's
+  /// activity, and [goalKcal] is the daily goal, all already computed by
+  /// Home. The goal includes activity, so burned calories are what the
+  /// ring draws as a reduction of the eaten arc. A goal of zero, or a
   /// negative goal, means there is no profile figure to show.
   factory CalorieWidgetSnapshot.fromHome({
     required double consumedKcal,
     required double goalKcal,
     required int offsetMinutes,
+    double burnedKcal = 0,
     DateTime? now,
   }) {
     final offset = sanitiseOffsetMinutes(offsetMinutes);
@@ -51,6 +57,7 @@ class CalorieWidgetSnapshot {
       dayId: formatDayId(logicalDay),
       offsetMinutes: offset,
       consumedKcal: hasData ? consumedKcal.round() : 0,
+      burnedKcal: hasData ? _nonNegative(burnedKcal.round()) : 0,
       goalKcal: hasData ? goal : 0,
     );
   }
@@ -81,8 +88,11 @@ class CalorieWidgetSnapshot {
     dayKey: dayId,
     offsetKey: '$offsetMinutes',
     consumedKey: '$consumedKcal',
+    burnedKey: '$burnedKcal',
     goalKey: '$goalKcal',
   };
+
+  static int _nonNegative(int value) => value < 0 ? 0 : value;
 
   static int sanitiseOffsetMinutes(int offsetMinutes) {
     if (offsetMinutes < 0 || offsetMinutes >= 24 * 60) return 0;

@@ -11,6 +11,7 @@ private enum CalorieWidgetKeys {
     static let day = "ont_calorie_day"
     static let offset = "ont_calorie_offset_minutes"
     static let consumed = "ont_calorie_consumed"
+    static let burned = "ont_calorie_burned"
     static let goal = "ont_calorie_goal"
 }
 
@@ -19,6 +20,7 @@ private struct CalorieReading {
     var dayId: String
     var offsetMinutes: Int
     var consumed: Int
+    var burned: Int
     var goal: Int
 
     static func load() -> CalorieReading {
@@ -28,6 +30,7 @@ private struct CalorieReading {
             dayId: defaults?.string(forKey: CalorieWidgetKeys.day) ?? "",
             offsetMinutes: Int(defaults?.string(forKey: CalorieWidgetKeys.offset) ?? "") ?? 0,
             consumed: Int(defaults?.string(forKey: CalorieWidgetKeys.consumed) ?? "") ?? 0,
+            burned: Int(defaults?.string(forKey: CalorieWidgetKeys.burned) ?? "") ?? 0,
             goal: Int(defaults?.string(forKey: CalorieWidgetKeys.goal) ?? "") ?? 0
         )
     }
@@ -76,7 +79,7 @@ private struct CalorieProvider: TimelineProvider {
     func placeholder(in context: Context) -> CalorieEntry {
         CalorieEntry(
             date: Date(),
-            reading: CalorieReading(hasData: false, dayId: "", offsetMinutes: 0, consumed: 0, goal: 0),
+            reading: CalorieReading(hasData: false, dayId: "", offsetMinutes: 0, consumed: 0, burned: 0, goal: 0),
             showsNumbers: false
         )
     }
@@ -111,8 +114,59 @@ private struct CalorieProvider: TimelineProvider {
     }
 }
 
+/// Same roles as `AppPalette`: accent ring, error when the day is over
+/// the goal, amber for the activity slice, teal for food eaten.
+private struct CaloriePalette {
+    var isDark: Bool
+
+    var track: Color {
+        isDark ? Color(red: 0x30 / 255, green: 0x2D / 255, blue: 0x28 / 255)
+            : Color(red: 0xEF / 255, green: 0xEA / 255, blue: 0xE1 / 255)
+    }
+
+    var accent: Color {
+        isDark ? Color(red: 0x34 / 255, green: 0xD0 / 255, blue: 0x8A / 255)
+            : Color(red: 0x0E / 255, green: 0x7A / 255, blue: 0x4D / 255)
+    }
+
+    var over: Color {
+        isDark ? Color(red: 1, green: 0xB4 / 255, blue: 0xAB / 255)
+            : Color(red: 0xC4 / 255, green: 0x45 / 255, blue: 0x3A / 255)
+    }
+
+    var activity: Color {
+        isDark ? Color(red: 0xF2 / 255, green: 0xB4 / 255, blue: 0x5A / 255)
+            : Color(red: 0xB8 / 255, green: 0x74 / 255, blue: 0x10 / 255)
+    }
+
+    var food: Color {
+        isDark ? Color(red: 0x49 / 255, green: 0xC9 / 255, blue: 0xB8 / 255)
+            : Color(red: 0x1F / 255, green: 0x8E / 255, blue: 0x80 / 255)
+    }
+
+    var text: Color {
+        isDark ? Color(red: 0xEC / 255, green: 0xE8 / 255, blue: 0xE1 / 255)
+            : Color(red: 0x2B / 255, green: 0x2A / 255, blue: 0x27 / 255)
+    }
+
+    var muted: Color {
+        isDark ? Color(red: 0xA3 / 255, green: 0x9E / 255, blue: 0x94 / 255)
+            : Color(red: 0x6E / 255, green: 0x68 / 255, blue: 0x5E / 255)
+    }
+
+    var canvas: Color {
+        isDark ? Color(red: 0x1B / 255, green: 0x1A / 255, blue: 0x18 / 255)
+            : Color(red: 0xF7 / 255, green: 0xF4 / 255, blue: 0xEF / 255)
+    }
+}
+
 private struct CalorieWidgetView: View {
+    @Environment(\.colorScheme) private var colorScheme
     var entry: CalorieEntry
+
+    private var palette: CaloriePalette {
+        CaloriePalette(isDark: colorScheme == .dark)
+    }
 
     var body: some View {
         Group {
@@ -123,49 +177,115 @@ private struct CalorieWidgetView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .widgetBackground()
+        .widgetBackground(palette.canvas)
     }
 
     private var progressBody: some View {
-        let goal = max(entry.reading.goal, 1)
-        let progress = min(max(Double(entry.reading.consumed) / Double(goal), 0), 1)
-        return VStack(spacing: 6) {
+        let eaten = max(entry.reading.consumed, 0)
+        let burned = max(entry.reading.burned, 0)
+        let remaining = entry.reading.goal - entry.reading.consumed
+        let isOver = remaining < 0
+        let shown = isOver ? -remaining : remaining
+        return VStack(spacing: 1) {
             ZStack {
-                Circle()
-                    .stroke(Color.secondary.opacity(0.25), lineWidth: 8)
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(
-                        Color.accentColor,
-                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
+                ring
                 VStack(spacing: 0) {
-                    Text("\(entry.reading.consumed)")
-                        .font(.title2.weight(.semibold))
-                        .minimumScaleFactor(0.6)
-                    Text("kcal")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    Text("\(shown)")
+                        .font(.system(size: 34, weight: .heavy, design: .rounded))
+                        .foregroundStyle(isOver ? palette.over : palette.text)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                    if isOver {
+                        Text("kcal too much")
+                            .font(.system(.caption2, design: .rounded).weight(.medium))
+                            .foregroundStyle(palette.over)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                    }
                 }
+                .padding(.horizontal, 22)
             }
             .padding(.horizontal, 8)
-            Text("of \(entry.reading.goal)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            HStack(spacing: 8) {
+                calorieStat(
+                    symbol: "fork.knife",
+                    value: "\(eaten)",
+                    tint: palette.food
+                )
+                Spacer(minLength: 4)
+                calorieStat(
+                    symbol: "flame.fill",
+                    value: burned > 0 ? "−\(burned)" : "0",
+                    tint: burned > 0 ? palette.activity : palette.muted
+                )
+            }
         }
-        .padding(12)
+        .padding(EdgeInsets(top: 2, leading: 2, bottom: 0, trailing: 2))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(entry.reading.consumed) of \(entry.reading.goal) kilocalories")
+        .accessibilityLabel(accessibilityText(isOver: isOver, shown: shown, eaten: eaten, burned: burned))
+    }
+
+    private var ring: some View {
+        let goal = max(entry.reading.goal, 1)
+        let eaten = max(entry.reading.consumed, 0)
+        let burned = max(entry.reading.burned, 0)
+        let remaining = entry.reading.goal - entry.reading.consumed
+        let isOver = remaining < 0
+        let consumedFraction = min(max(Double(eaten) / Double(goal), 0), 1)
+        let burnedFraction = min(max(Double(burned) / Double(goal), 0), consumedFraction)
+        return ZStack {
+            Circle()
+                .stroke(palette.track, lineWidth: 13)
+            Circle()
+                .trim(from: 0, to: consumedFraction)
+                .stroke(
+                    isOver ? palette.over : palette.accent,
+                    style: StrokeStyle(lineWidth: 13, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+            if burnedFraction > 0 {
+                Circle()
+                    .trim(from: consumedFraction - burnedFraction, to: consumedFraction)
+                    .stroke(
+                        palette.activity,
+                        style: StrokeStyle(lineWidth: 13, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func calorieStat(symbol: String, value: String, tint: Color) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: symbol)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(tint)
+            Text(value)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(tint)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+    }
+
+    private func accessibilityText(isOver: Bool, shown: Int, eaten: Int, burned: Int) -> String {
+        let state = isOver
+            ? "\(shown) kilocalories over the goal"
+            : "\(shown) kilocalories left"
+        return "\(state), \(eaten) eaten, \(burned) reduced by activity"
     }
 
     private var placeholderBody: some View {
         VStack(spacing: 4) {
             Text("Calories")
                 .font(.headline)
+                .foregroundStyle(palette.text)
             Text("Open the app")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(palette.muted)
         }
         .padding(12)
         .accessibilityElement(children: .combine)
@@ -174,11 +294,11 @@ private struct CalorieWidgetView: View {
 
 private extension View {
     @ViewBuilder
-    func widgetBackground() -> some View {
+    func widgetBackground(_ color: Color) -> some View {
         if #available(iOSApplicationExtension 17.0, *) {
-            containerBackground(.fill.tertiary, for: .widget)
+            containerBackground(color, for: .widget)
         } else {
-            background(Color(.systemBackground))
+            background(color)
         }
     }
 }
@@ -191,7 +311,7 @@ struct CalorieProgressWidget: Widget {
             CalorieWidgetView(entry: entry)
         }
         .configurationDisplayName("GO Calorie")
-        .description("Today's calories eaten and your goal.")
+        .description("Calories left today, and how food and activity change them.")
         .supportedFamilies([.systemSmall])
     }
 }

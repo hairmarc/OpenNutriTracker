@@ -21,8 +21,39 @@ void main() {
         CalorieWidgetSnapshot.dayKey: '2026-09-23',
         CalorieWidgetSnapshot.offsetKey: '0',
         CalorieWidgetSnapshot.consumedKey: '180',
+        CalorieWidgetSnapshot.burnedKey: '0',
         CalorieWidgetSnapshot.goalKey: '2001',
       });
+    });
+
+    test('burned kilocalories are the activity reduction, never negative', () {
+      final snapshot = CalorieWidgetSnapshot.fromHome(
+        consumedKcal: 1800,
+        goalKcal: 2200,
+        burnedKcal: 250.6,
+        offsetMinutes: 0,
+        now: DateTime(2026, 9, 23, 13, 0),
+      );
+      final cleared = CalorieWidgetSnapshot.fromHome(
+        consumedKcal: 40,
+        goalKcal: 0,
+        burnedKcal: 80,
+        offsetMinutes: 0,
+        now: DateTime(2026, 9, 23, 13, 0),
+      );
+      final negative = CalorieWidgetSnapshot.fromHome(
+        consumedKcal: 100,
+        goalKcal: 2000,
+        burnedKcal: -20,
+        offsetMinutes: 0,
+        now: DateTime(2026, 9, 23, 13, 0),
+      );
+
+      expect(snapshot.burnedKcal, 251);
+      expect(snapshot.toPayload()[CalorieWidgetSnapshot.burnedKey], '251');
+      expect(negative.burnedKcal, 0);
+      expect(cleared.burnedKcal, 0);
+      expect(cleared.toPayload()[CalorieWidgetSnapshot.burnedKey], '0');
     });
 
     test('a zero goal is a placeholder, not a progress ring', () {

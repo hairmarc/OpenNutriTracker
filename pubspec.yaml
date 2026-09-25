@@ -121,6 +121,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/icon/go_calorie_icon.png
     - assets/icon/ont_logo_square.svg
     - assets/icon/ont_splash_rings.svg
     - assets/icon/ont_splash_spoon.svg

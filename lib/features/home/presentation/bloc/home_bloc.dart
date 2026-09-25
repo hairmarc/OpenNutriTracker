@@ -252,6 +252,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
       await _publishCalorieWidget(
         consumedKcal: totalKcalIntake,
+        burnedKcal: totalKcalActivities,
         goalKcal: totalKcalGoal,
         offsetMinutes: configData.dayStartOffsetTotalMinutes,
       );
@@ -260,11 +261,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _publishCalorieWidget({
     required double consumedKcal,
+    required double burnedKcal,
     required double goalKcal,
     required int offsetMinutes,
   }) async {
     final snapshot = CalorieWidgetSnapshot.fromHome(
       consumedKcal: consumedKcal,
+      burnedKcal: burnedKcal,
       goalKcal: goalKcal,
       offsetMinutes: offsetMinutes,
     );
