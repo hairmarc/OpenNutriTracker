@@ -120,8 +120,8 @@ private struct CaloriePalette {
     var isDark: Bool
 
     var track: Color {
-        isDark ? Color(red: 0x30 / 255, green: 0x2D / 255, blue: 0x28 / 255)
-            : Color(red: 0xEF / 255, green: 0xEA / 255, blue: 0xE1 / 255)
+        isDark ? Color(red: 0x3A / 255, green: 0x3A / 255, blue: 0x3C / 255)
+            : Color(red: 0xE3 / 255, green: 0xE3 / 255, blue: 0xE8 / 255)
     }
 
     var accent: Color {
@@ -145,18 +145,19 @@ private struct CaloriePalette {
     }
 
     var text: Color {
-        isDark ? Color(red: 0xEC / 255, green: 0xE8 / 255, blue: 0xE1 / 255)
-            : Color(red: 0x2B / 255, green: 0x2A / 255, blue: 0x27 / 255)
+        isDark ? Color(red: 0xF2 / 255, green: 0xF2 / 255, blue: 0xF7 / 255)
+            : Color(red: 0x1C / 255, green: 0x1C / 255, blue: 0x1E / 255)
     }
 
     var muted: Color {
-        isDark ? Color(red: 0xA3 / 255, green: 0x9E / 255, blue: 0x94 / 255)
-            : Color(red: 0x6E / 255, green: 0x68 / 255, blue: 0x5E / 255)
+        isDark ? Color(red: 0xAE / 255, green: 0xAE / 255, blue: 0xB2 / 255)
+            : Color(red: 0x6E / 255, green: 0x6E / 255, blue: 0x73 / 255)
     }
 
+    /// White card in light mode, matching the in-app calorie card.
     var canvas: Color {
-        isDark ? Color(red: 0x1B / 255, green: 0x1A / 255, blue: 0x18 / 255)
-            : Color(red: 0xF7 / 255, green: 0xF4 / 255, blue: 0xEF / 255)
+        isDark ? Color(red: 0x2C / 255, green: 0x2C / 255, blue: 0x2E / 255)
+            : Color.white
     }
 }
 
@@ -191,13 +192,13 @@ private struct CalorieWidgetView: View {
                 ring
                 VStack(spacing: 0) {
                     Text("\(shown)")
-                        .font(.system(size: 34, weight: .heavy, design: .rounded))
+                        .font(.system(size: 40, weight: .black))
                         .foregroundStyle(isOver ? palette.over : palette.text)
                         .minimumScaleFactor(0.5)
                         .lineLimit(1)
                     if isOver {
                         Text("kcal too much")
-                            .font(.system(.caption2, design: .rounded).weight(.medium))
+                            .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(palette.over)
                             .minimumScaleFactor(0.7)
                             .lineLimit(1)
@@ -261,10 +262,10 @@ private struct CalorieWidgetView: View {
     private func calorieStat(symbol: String, value: String, tint: Color) -> some View {
         HStack(spacing: 3) {
             Image(systemName: symbol)
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(tint)
             Text(value)
-                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .font(.system(size: 15, weight: .heavy))
                 .foregroundStyle(tint)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
@@ -281,11 +282,13 @@ private struct CalorieWidgetView: View {
     private var placeholderBody: some View {
         VStack(spacing: 4) {
             Text("Calories")
-                .font(.headline)
+                .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(palette.text)
+                .lineLimit(1)
             Text("Open the app")
-                .font(.caption)
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(palette.muted)
+                .lineLimit(1)
         }
         .padding(12)
         .accessibilityElement(children: .combine)

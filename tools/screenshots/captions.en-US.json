@@ -29,7 +29,7 @@
   },
   "style": {
     "band_fraction": 0.18,
-    "background": "#F7F4EF",
+    "background": "#F2F2F6",
     "text": "#2B2A27",
     "font": "fonts/Poppins-Bold.ttf",
     "max_lines": 2,

@@ -212,7 +212,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   value: displayValue.toInt(),
                                   textStyle: textTheme.displaySmall?.copyWith(
                                     height: 1,
-                                    fontSize: 44,
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -1.2,
                                     color: isOver ? overColor : null,
                                   ),
                                 ),
@@ -220,8 +222,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   const SizedBox(height: 2),
                                   Text(
                                     kcalLabelText,
-                                    style: textTheme.bodyMedium?.copyWith(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.titleSmall?.copyWith(
                                       color: overColor,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ],
@@ -371,7 +376,11 @@ class _MiniStat extends StatelessWidget {
       value,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: textTheme.titleMedium?.copyWith(color: valueColor),
+      style: textTheme.titleLarge?.copyWith(
+        color: valueColor,
+        fontWeight: FontWeight.w800,
+        fontSize: 22,
+      ),
     );
     final badge = Container(
       padding: const EdgeInsets.all(8),
@@ -416,7 +425,7 @@ class _MacroTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final pct = (goal <= 0) ? 0.0 : (intake / goal).clamp(0.0, 1.0);
     return AppCard(
-      borderRadius: Dimens.radiusM,
+      borderRadius: Dimens.radiusL,
       padding: const EdgeInsets.fromLTRB(
         Dimens.spacing16,
         Dimens.spacing16,
@@ -434,7 +443,14 @@ class _MacroTile extends StatelessWidget {
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 6),
-              Flexible(child: Text(label, style: textTheme.labelMedium)),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.labelMedium,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: Dimens.spacing12),
@@ -450,6 +466,8 @@ class _MacroTile extends StatelessWidget {
           const SizedBox(height: Dimens.spacing12),
           Text(
             '${intake.toInt()}/${goal.toInt()} g',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: textTheme.bodySmall?.copyWith(
               color: palette.textStrong,
               fontWeight: FontWeight.w700,

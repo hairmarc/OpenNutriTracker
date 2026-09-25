@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
@@ -18,8 +19,7 @@ class FastingHomeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          locator<FastingBloc>()..add(const FastingLoadRequested()),
+      create: (_) => locator<FastingBloc>()..add(const FastingLoadRequested()),
       child: const _FastingHomeChipView(),
     );
   }
@@ -49,41 +49,30 @@ class _FastingHomeChipView extends StatelessWidget {
           ),
           child: Semantics(
             identifier: 'home-fasting-chip',
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: Dimens.borderRadiusM,
-              child: InkWell(
-                borderRadius: Dimens.borderRadiusM,
-                onTap: () => Navigator.of(context)
-                    .pushNamed(NavigationOptions.fastingRoute),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: Dimens.spacing16,
-                    vertical: Dimens.spacing12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: Dimens.borderRadiusM,
-                    border: Border.all(
-                      color: palette.border,
-                      width: Dimens.hairline,
+            child: AppCard(
+              onTap: () => Navigator.of(
+                context,
+              ).pushNamed(NavigationOptions.fastingRoute),
+              borderRadius: Dimens.radiusL,
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimens.spacing16,
+                vertical: Dimens.spacing12,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.timer_rounded, size: 20, color: accent),
+                  const SizedBox(width: Dimens.spacing8),
+                  Text(
+                    S.of(context).fastingHomeChipBody(remaining),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.titleSmall?.copyWith(
+                      color: palette.textStrong,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.timer_rounded, size: 18, color: accent),
-                      const SizedBox(width: Dimens.spacing8),
-                      Text(
-                        S.of(context).fastingHomeChipBody(remaining),
-                        style: textTheme.labelLarge?.copyWith(
-                          color: palette.textStrong,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
             ),
           ),
