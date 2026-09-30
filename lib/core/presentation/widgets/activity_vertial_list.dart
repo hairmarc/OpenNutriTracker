@@ -2,7 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/domain/entity/user_activity_entity.dart';
 import 'package:opennutritracker/core/presentation/widgets/activity_card.dart';
-import 'package:opennutritracker/core/presentation/widgets/placeholder_card.dart';
+import 'package:opennutritracker/core/presentation/widgets/section_add_button.dart';
 import 'package:opennutritracker/core/presentation/widgets/share_qr_dialog.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/navigation_options.dart';
@@ -39,11 +39,16 @@ class ActivityVerticalList extends StatefulWidget {
 class _ActivityVerticalListState extends State<ActivityVerticalList> {
   @override
   Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.fromLTRB(
-              Dimens.spacing16, Dimens.spacing16, Dimens.spacing16, Dimens.spacing8),
+            Dimens.spacing16,
+            Dimens.spacing16,
+            Dimens.spacing4,
+            Dimens.spacing8,
+          ),
           alignment: Alignment.centerLeft,
           child: Row(
             children: [
@@ -72,9 +77,9 @@ class _ActivityVerticalListState extends State<ActivityVerticalList> {
                       }
                     case _ActivityPopupMenuSelection.onShare:
                       if (context.mounted) {
-                        final code = SharedActivityPayload
-                                .fromUserActivityList(widget.userActivityList)
-                            .toJsonString();
+                        final code = SharedActivityPayload.fromUserActivityList(
+                          widget.userActivityList,
+                        ).toJsonString();
                         await showDialog(
                           context: context,
                           builder: (_) => ShareQrDialog(
@@ -94,44 +99,40 @@ class _ActivityVerticalListState extends State<ActivityVerticalList> {
                 },
                 itemBuilder: (BuildContext context) =>
                     <PopupMenuEntry<_ActivityPopupMenuSelection>>[
-                  if (widget.onCopyActivityCallback != null &&
-                      widget.userActivityList.isNotEmpty)
-                    PopupMenuItem<_ActivityPopupMenuSelection>(
-                      value: _ActivityPopupMenuSelection.onCopy,
-                      child: Text(S.of(context).dialogCopyLabel),
-                    ),
-                  if (widget.userActivityList.isNotEmpty)
-                    PopupMenuItem<_ActivityPopupMenuSelection>(
-                      value: _ActivityPopupMenuSelection.onShare,
-                      child: Text(S.of(context).shareActivityLabel),
-                    ),
-                  PopupMenuItem<_ActivityPopupMenuSelection>(
-                    value: _ActivityPopupMenuSelection.onImport,
-                    child: Text(S.of(context).importActivityLabel),
-                  ),
-                ],
+                      if (widget.onCopyActivityCallback != null &&
+                          widget.userActivityList.isNotEmpty)
+                        PopupMenuItem<_ActivityPopupMenuSelection>(
+                          value: _ActivityPopupMenuSelection.onCopy,
+                          child: Text(S.of(context).dialogCopyLabel),
+                        ),
+                      if (widget.userActivityList.isNotEmpty)
+                        PopupMenuItem<_ActivityPopupMenuSelection>(
+                          value: _ActivityPopupMenuSelection.onShare,
+                          child: Text(S.of(context).shareActivityLabel),
+                        ),
+                      PopupMenuItem<_ActivityPopupMenuSelection>(
+                        value: _ActivityPopupMenuSelection.onImport,
+                        child: Text(S.of(context).importActivityLabel),
+                      ),
+                    ],
+              ),
+              SectionAddButton(
+                identifier: 'add-activity-placeholder',
+                tooltip: S.of(context).addLabel,
+                accent: accent,
+                onPressed: () => _onPlaceholderCardTapped(context),
               ),
             ],
           ),
         ),
-        Column(
-          children: [
-            for (final userActivity in widget.userActivityList)
-              ActivityCard(
-                activityEntity: userActivity,
-                onItemLongPressed: widget.onItemLongPressedCallback,
-                onItemTapped: widget.onItemTappedCallback,
-                onItemDragCallback: widget.onItemDragCallback,
-                firstListElement: false,
-              ),
-            PlaceholderCard(
-              day: widget.day,
-              onTap: () => _onPlaceholderCardTapped(context),
-              firstListElement: true,
-              semanticIdentifier: 'add-activity-placeholder',
-            ),
-          ],
-        ),
+        for (final userActivity in widget.userActivityList)
+          ActivityCard(
+            activityEntity: userActivity,
+            onItemLongPressed: widget.onItemLongPressedCallback,
+            onItemTapped: widget.onItemTappedCallback,
+            onItemDragCallback: widget.onItemDragCallback,
+            firstListElement: false,
+          ),
       ],
     );
   }

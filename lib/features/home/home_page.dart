@@ -235,15 +235,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   caloriesProfile: userCaloriesProfile,
                 ),
               ),
-            if (showActivityTracking)
-              ActivityVerticalList(
-                day: DateTime.now(),
-                title: S.of(context).activityLabel,
-                userActivityList: userActivities,
-                onItemLongPressedCallback: onActivityItemLongPressed,
-                onItemTappedCallback: onActivityItemTapped,
-                onItemDragCallback: onActivityItemDrag,
-              ),
             // #150 follow-up: a 0% share (e.g. OMAD sets snack to 0) hides the
             // section entirely so the home view doesn't carry an empty header
             // the user explicitly opted out of. Already-logged intakes for a
@@ -304,7 +295,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 showMealMacros: showMealMacros,
                 mealKcalTarget: snackKcalTarget,
               ),
-            const SizedBox(height: 48.0),
+            if (showActivityTracking)
+              ActivityVerticalList(
+                day: DateTime.now(),
+                title: S.of(context).activityLabel,
+                userActivityList: userActivities,
+                onItemLongPressedCallback: onActivityItemLongPressed,
+                onItemTappedCallback: onActivityItemTapped,
+                onItemDragCallback: onActivityItemDrag,
+              ),
+            const SizedBox(height: Dimens.spacing16),
           ],
         ),
         Align(

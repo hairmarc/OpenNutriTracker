@@ -47,7 +47,7 @@ class AppPalette {
     brightness: Brightness.light,
     canvas: Color(0xFFF2F2F6),
     surface: Color(0xFFFFFFFF),
-    // A step darker than [canvas]. The meal-list "+" rows use this fill.
+    // A step darker than [canvas].
     surfaceMuted: Color(0xFFE3E3E8),
     border: Color(0xFFE4E4EA),
     shadow: Color(0x14000000),

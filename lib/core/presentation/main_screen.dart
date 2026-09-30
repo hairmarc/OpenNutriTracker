@@ -133,23 +133,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: Semantics(
-        identifier: 'fab-add-item',
-        child: FloatingActionButton(
-          onPressed: () => _onFabPressed(context),
-          tooltip: S.of(context).addLabel,
-          child: const Icon(Icons.add, size: 30),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: palette.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: 78,
         padding: EdgeInsets.zero,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
         child: Row(
           children: [
             _NavItem(
@@ -172,7 +161,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
               palette: palette,
               onTap: _setPage,
             ),
-            const SizedBox(width: 64), // notch gap for the centre Add FAB
+            _CenterAddButton(
+              tooltip: S.of(context).addLabel,
+              onPressed: () => _onFabPressed(context),
+            ),
             _NavItem(
               id: 'nav-trends',
               icon: Icons.insights_outlined,
@@ -219,6 +211,71 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           suggestedType: MealTypeSuggester.suggestFromTime(DateTime.now()),
         );
       },
+    );
+  }
+}
+
+/// Green add control seated in the bottom bar, centred on the nav icons.
+class _CenterAddButton extends StatelessWidget {
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _CenterAddButton({required this.tooltip, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 64,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 26,
+              child: OverflowBox(
+                maxWidth: 40,
+                maxHeight: 40,
+                child: Semantics(
+                  identifier: 'fab-add-item',
+                  container: true,
+                  child: IconButton(
+                    tooltip: tooltip,
+                    onPressed: onPressed,
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.primary,
+                      foregroundColor: scheme.onPrimary,
+                      fixedSize: const Size(40, 40),
+                      minimumSize: const Size(40, 40),
+                      maximumSize: const Size(40, 40),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add, size: 26),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 3),
+            // Matches the nav-item label line so the circle sits on the icons.
+            ExcludeSemantics(
+              child: Opacity(
+                opacity: 0,
+                child: Text(
+                  tooltip,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

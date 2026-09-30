@@ -221,6 +221,11 @@ private struct CalorieWidgetView: View {
                     tint: burned > 0 ? palette.activity : palette.muted
                 )
             }
+            // The ring already fills the space above this row. Top padding
+            // opens the gap; the matching negative bottom padding drops the
+            // row toward the widget edge without resizing the ring.
+            .padding(.top, 12)
+            .padding(.bottom, -12)
         }
         .padding(EdgeInsets(top: 2, leading: 2, bottom: 0, trailing: 2))
         .accessibilityElement(children: .ignore)
