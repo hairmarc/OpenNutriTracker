@@ -2,6 +2,8 @@
 
 A small, read-only Home Screen widget shows how many calories are left today. The ring matches the home card: green while calories remain, red when the day is over the goal, with an amber slice for calories offset by activity. Food and activity totals sit under the ring. It reads an App Group snapshot written when Home finishes loading. It does not open the encrypted Hive database. Activity kilocalories are stored as `ont_calorie_burned`.
 
+The whole numbers are the same ones the home card prints. Each total is truncated toward zero, and calories left are truncated after intake is subtracted from the goal. Those two integers are `ont_calorie_shown` (the absolute center value) and `ont_calorie_over` (`1` when the day is past the goal, including by a fraction of a kilocalorie).
+
 Android stores the same snapshot and has no widget UI yet. That work is tracked separately.
 
 ## App Group

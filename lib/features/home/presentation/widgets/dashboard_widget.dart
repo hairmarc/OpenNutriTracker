@@ -4,6 +4,7 @@ import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/presentation/widgets/sf_symbol_icon.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
+import 'package:opennutritracker/core/utils/calc/calorie_card_figures.dart';
 import 'package:opennutritracker/core/utils/calc/unit_calc.dart';
 import 'package:opennutritracker/core/utils/energy_unit_provider.dart';
 import 'package:opennutritracker/features/settings/presentation/widgets/kcal_goal_info_screen.dart';
@@ -50,37 +51,33 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    double kcalValue = 0;
     double gaugeValue = 0;
     final usesKilojoules = context.watch<EnergyUnitProvider>().usesKilojoules;
+    double displayed(double kcal) =>
+        usesKilojoules ? UnitCalc.kcalToKj(kcal) : kcal;
+    // Same integers the home-screen widget publishes.
+    final figures = CalorieCardFigures.fromTotals(
+      daily: displayed(widget.totalKcalDaily),
+      supplied: displayed(widget.totalKcalSupplied),
+      burned: displayed(widget.totalKcalBurned),
+      left: displayed(widget.totalKcalLeft),
+    );
     String kcalLabelText = usesKilojoules
         ? '${S.of(context).kjLabel} ${S.of(context).energyLeftLabel}'
         : S.of(context).kcalLeftLabel;
 
     if (widget.totalKcalLeft > widget.totalKcalDaily) {
-      kcalValue = widget.totalKcalDaily;
       gaugeValue = 0;
     } else if (widget.totalKcalLeft < 0) {
-      kcalValue = widget.totalKcalLeft.abs();
       gaugeValue = 1;
       kcalLabelText = usesKilojoules
           ? '${S.of(context).kjLabel} ${S.of(context).energyTooMuchLabel}'
           : S.of(context).kcalTooMuchLabel;
     } else {
-      kcalValue = widget.totalKcalLeft;
       gaugeValue =
           (widget.totalKcalDaily - widget.totalKcalLeft) /
           widget.totalKcalDaily;
     }
-    final displayValue = usesKilojoules
-        ? UnitCalc.kcalToKj(kcalValue)
-        : kcalValue;
-    final displaySupplied = usesKilojoules
-        ? UnitCalc.kcalToKj(widget.totalKcalSupplied)
-        : widget.totalKcalSupplied;
-    final displayBurned = usesKilojoules
-        ? UnitCalc.kcalToKj(widget.totalKcalBurned)
-        : widget.totalKcalBurned;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final palette = isDark ? AppPalette.dark : AppPalette.light;
@@ -98,11 +95,11 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             0.0,
             consumedFraction,
           );
-    final burnedInt = displayBurned.toInt();
+    final burnedInt = figures.burned;
     final gaugeLabel = burnedInt > 0
-        ? '${displayValue.toInt()} $kcalLabelText, '
+        ? '${figures.shown} $kcalLabelText, '
               '$burnedInt ${S.of(context).burnedLabel}'
-        : '${displayValue.toInt()} $kcalLabelText';
+        : '${figures.shown} $kcalLabelText';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -141,7 +138,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             size: 20,
                           ),
                         ),
-                        value: '${displaySupplied.toInt()}',
+                        value: '${figures.supplied}',
                         spokenLabel: S.of(context).suppliedLabel,
                         color: palette.proteinColor,
                       ),
@@ -209,7 +206,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 AnimatedFlipCounter(
                                   duration: const Duration(milliseconds: 800),
                                   curve: AppMotion.emphasized,
-                                  value: displayValue.toInt(),
+                                  value: figures.shown,
                                   textStyle: textTheme.displaySmall?.copyWith(
                                     height: 1,
                                     fontSize: 56,

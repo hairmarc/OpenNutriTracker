@@ -13,6 +13,8 @@ private enum CalorieWidgetKeys {
     static let consumed = "ont_calorie_consumed"
     static let burned = "ont_calorie_burned"
     static let goal = "ont_calorie_goal"
+    static let shown = "ont_calorie_shown"
+    static let over = "ont_calorie_over"
 }
 
 private struct CalorieReading {
@@ -22,16 +24,37 @@ private struct CalorieReading {
     var consumed: Int
     var burned: Int
     var goal: Int
+    /// Absolute kilocalories the home card prints in the ring.
+    var shown: Int
+    var isOver: Bool
 
     static func load() -> CalorieReading {
         let defaults = UserDefaults(suiteName: CalorieWidgetKeys.appGroupId)
+        let consumed = Int(defaults?.string(forKey: CalorieWidgetKeys.consumed) ?? "") ?? 0
+        let goal = Int(defaults?.string(forKey: CalorieWidgetKeys.goal) ?? "") ?? 0
+        let shownString = defaults?.string(forKey: CalorieWidgetKeys.shown)
+        let overString = defaults?.string(forKey: CalorieWidgetKeys.over)
+        let shown: Int
+        let isOver: Bool
+        if let shownString, let parsed = Int(shownString), overString != nil {
+            shown = max(parsed, 0)
+            isOver = overString == "1"
+        } else {
+            // Older snapshots stored only the parts. The center is their
+            // difference until the app writes ont_calorie_shown.
+            let remaining = goal - consumed
+            isOver = remaining < 0
+            shown = isOver ? -remaining : remaining
+        }
         return CalorieReading(
             hasData: defaults?.string(forKey: CalorieWidgetKeys.hasData) == "1",
             dayId: defaults?.string(forKey: CalorieWidgetKeys.day) ?? "",
             offsetMinutes: Int(defaults?.string(forKey: CalorieWidgetKeys.offset) ?? "") ?? 0,
-            consumed: Int(defaults?.string(forKey: CalorieWidgetKeys.consumed) ?? "") ?? 0,
+            consumed: consumed,
             burned: Int(defaults?.string(forKey: CalorieWidgetKeys.burned) ?? "") ?? 0,
-            goal: Int(defaults?.string(forKey: CalorieWidgetKeys.goal) ?? "") ?? 0
+            goal: goal,
+            shown: shown,
+            isOver: isOver
         )
     }
 
@@ -79,7 +102,16 @@ private struct CalorieProvider: TimelineProvider {
     func placeholder(in context: Context) -> CalorieEntry {
         CalorieEntry(
             date: Date(),
-            reading: CalorieReading(hasData: false, dayId: "", offsetMinutes: 0, consumed: 0, burned: 0, goal: 0),
+            reading: CalorieReading(
+                hasData: false,
+                dayId: "",
+                offsetMinutes: 0,
+                consumed: 0,
+                burned: 0,
+                goal: 0,
+                shown: 0,
+                isOver: false
+            ),
             showsNumbers: false
         )
     }
@@ -182,11 +214,10 @@ private struct CalorieWidgetView: View {
     }
 
     private var progressBody: some View {
-        let eaten = max(entry.reading.consumed, 0)
-        let burned = max(entry.reading.burned, 0)
-        let remaining = entry.reading.goal - entry.reading.consumed
-        let isOver = remaining < 0
-        let shown = isOver ? -remaining : remaining
+        let eaten = entry.reading.consumed
+        let burned = entry.reading.burned
+        let shown = entry.reading.shown
+        let isOver = entry.reading.isOver
         return VStack(spacing: 1) {
             ZStack {
                 ring
@@ -217,7 +248,7 @@ private struct CalorieWidgetView: View {
                 Spacer(minLength: 4)
                 calorieStat(
                     symbol: "flame.fill",
-                    value: burned > 0 ? "−\(burned)" : "0",
+                    value: burned > 0 ? "−\(burned)" : "\(burned)",
                     tint: burned > 0 ? palette.activity : palette.muted
                 )
             }
@@ -236,8 +267,7 @@ private struct CalorieWidgetView: View {
         let goal = max(entry.reading.goal, 1)
         let eaten = max(entry.reading.consumed, 0)
         let burned = max(entry.reading.burned, 0)
-        let remaining = entry.reading.goal - entry.reading.consumed
-        let isOver = remaining < 0
+        let isOver = entry.reading.isOver
         let consumedFraction = min(max(Double(eaten) / Double(goal), 0), 1)
         let burnedFraction = min(max(Double(burned) / Double(goal), 0), consumedFraction)
         return ZStack {

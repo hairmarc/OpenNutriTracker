@@ -133,59 +133,61 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
+      // Flush with the screen edge. BottomAppBar would pad for the home
+      // indicator and keep this row tall, so the bar is only the buttons.
+      bottomNavigationBar: Material(
         color: palette.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        height: 78,
-        padding: EdgeInsets.zero,
-        child: Row(
-          children: [
-            _NavItem(
-              id: 'nav-home',
-              icon: Icons.home_outlined,
-              selectedIcon: Icons.home_rounded,
-              label: S.of(context).homeLabel,
-              index: 0,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-            _NavItem(
-              id: 'nav-diary',
-              icon: Icons.book_outlined,
-              selectedIcon: Icons.book_rounded,
-              label: S.of(context).diaryLabel,
-              index: 1,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-            _CenterAddButton(
-              tooltip: S.of(context).addLabel,
-              onPressed: () => _onFabPressed(context),
-            ),
-            _NavItem(
-              id: 'nav-trends',
-              icon: Icons.insights_outlined,
-              selectedIcon: Icons.insights_rounded,
-              label: S.of(context).trendsLabel,
-              index: 2,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-            _NavItem(
-              id: 'nav-you',
-              icon: Icons.account_circle_outlined,
-              selectedIcon: Icons.account_circle_rounded,
-              label: S.of(context).youLabel,
-              index: 3,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-          ],
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _NavItem(
+                id: 'nav-home',
+                icon: Icons.home_outlined,
+                selectedIcon: Icons.home_rounded,
+                label: S.of(context).homeLabel,
+                index: 0,
+                selectedIndex: _selectedPageIndex,
+                palette: palette,
+                onTap: _setPage,
+              ),
+              _NavItem(
+                id: 'nav-diary',
+                icon: Icons.book_outlined,
+                selectedIcon: Icons.book_rounded,
+                label: S.of(context).diaryLabel,
+                index: 1,
+                selectedIndex: _selectedPageIndex,
+                palette: palette,
+                onTap: _setPage,
+              ),
+              _CenterAddButton(
+                tooltip: S.of(context).addLabel,
+                onPressed: () => _onFabPressed(context),
+              ),
+              _NavItem(
+                id: 'nav-trends',
+                icon: Icons.insights_outlined,
+                selectedIcon: Icons.insights_rounded,
+                label: S.of(context).trendsLabel,
+                index: 2,
+                selectedIndex: _selectedPageIndex,
+                palette: palette,
+                onTap: _setPage,
+              ),
+              _NavItem(
+                id: 'nav-you',
+                icon: Icons.account_circle_outlined,
+                selectedIcon: Icons.account_circle_rounded,
+                label: S.of(context).youLabel,
+                index: 3,
+                selectedIndex: _selectedPageIndex,
+                palette: palette,
+                onTap: _setPage,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -227,54 +229,51 @@ class _CenterAddButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: 64,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 26,
-              child: OverflowBox(
-                maxWidth: 40,
-                maxHeight: 40,
-                child: Semantics(
-                  identifier: 'fab-add-item',
-                  container: true,
-                  child: IconButton(
-                    tooltip: tooltip,
-                    onPressed: onPressed,
-                    style: IconButton.styleFrom(
-                      backgroundColor: scheme.primary,
-                      foregroundColor: scheme.onPrimary,
-                      fixedSize: const Size(40, 40),
-                      minimumSize: const Size(40, 40),
-                      maximumSize: const Size(40, 40),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(22),
-                      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 26,
+            child: OverflowBox(
+              maxWidth: 32,
+              maxHeight: 32,
+              child: Semantics(
+                identifier: 'fab-add-item',
+                container: true,
+                child: IconButton(
+                  tooltip: tooltip,
+                  onPressed: onPressed,
+                  style: IconButton.styleFrom(
+                    backgroundColor: scheme.primary,
+                    foregroundColor: scheme.onPrimary,
+                    fixedSize: const Size(32, 32),
+                    minimumSize: const Size(32, 32),
+                    maximumSize: const Size(32, 32),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    icon: const Icon(Icons.add, size: 26),
                   ),
+                  icon: const Icon(Icons.add, size: 22),
                 ),
               ),
             ),
-            const SizedBox(height: 3),
-            // Matches the nav-item label line so the circle sits on the icons.
-            ExcludeSemantics(
-              child: Opacity(
-                opacity: 0,
-                child: Text(
-                  tooltip,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+          ),
+          const SizedBox(height: 2),
+          // Matches the nav-item label line so the circle sits on the icons.
+          ExcludeSemantics(
+            child: Opacity(
+              opacity: 0,
+              child: Text(
+                tooltip,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -313,21 +312,20 @@ class _NavItem extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () => onTap(index),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(selected ? selectedIcon : icon, color: color, size: 26),
-                const SizedBox(height: 3),
-                Text(
-                  label,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: color),
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(selected ? selectedIcon : icon, color: color, size: 26),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: color),
+              ),
+            ],
           ),
         ),
       ),

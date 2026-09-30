@@ -1,3 +1,4 @@
+import 'package:opennutritracker/core/utils/calc/calorie_card_figures.dart';
 import 'package:opennutritracker/core/utils/calc/day_boundary_calc.dart';
 
 /// Today's calorie figures for the iOS home-screen widget.
@@ -16,6 +17,8 @@ class CalorieWidgetSnapshot {
   static const consumedKey = 'ont_calorie_consumed';
   static const burnedKey = 'ont_calorie_burned';
   static const goalKey = 'ont_calorie_goal';
+  static const shownKey = 'ont_calorie_shown';
+  static const overKey = 'ont_calorie_over';
 
   final bool hasData;
   final String dayId;
@@ -24,6 +27,13 @@ class CalorieWidgetSnapshot {
   final int burnedKcal;
   final int goalKcal;
 
+  /// Absolute kilocalories printed in the center of the home card.
+  final int shownKcal;
+
+  /// True when the day is over the goal. [shownKcal] is the overrun, and
+  /// it stays 0 when the overrun is less than one kilocalorie.
+  final bool isOver;
+
   const CalorieWidgetSnapshot({
     required this.hasData,
     required this.dayId,
@@ -31,6 +41,8 @@ class CalorieWidgetSnapshot {
     required this.consumedKcal,
     required this.burnedKcal,
     required this.goalKcal,
+    required this.shownKcal,
+    required this.isOver,
   });
 
   /// Builds the snapshot Home should publish.
@@ -40,6 +52,11 @@ class CalorieWidgetSnapshot {
   /// Home. The goal includes activity, so burned calories are what the
   /// ring draws as a reduction of the eaten arc. A goal of zero, or a
   /// negative goal, means there is no profile figure to show.
+  ///
+  /// The integers are [CalorieCardFigures]: the same truncation the home
+  /// card prints. [shownKcal] is calories left (or the overrun) truncated
+  /// after the subtraction, so the center matches the card when the
+  /// fractional parts of the goal and the intake point different ways.
   factory CalorieWidgetSnapshot.fromHome({
     required double consumedKcal,
     required double goalKcal,
@@ -50,15 +67,21 @@ class CalorieWidgetSnapshot {
     final offset = sanitiseOffsetMinutes(offsetMinutes);
     final moment = now ?? DateTime.now();
     final logicalDay = DayBoundaryCalc.logicalDayOfMinutes(moment, offset);
-    final goal = goalKcal.round();
-    final hasData = goal > 0;
+    final figures = CalorieCardFigures.fromTotals(
+      daily: goalKcal,
+      supplied: consumedKcal,
+      burned: burnedKcal,
+    );
+    final hasData = figures.goal > 0;
     return CalorieWidgetSnapshot(
       hasData: hasData,
       dayId: formatDayId(logicalDay),
       offsetMinutes: offset,
-      consumedKcal: hasData ? consumedKcal.round() : 0,
-      burnedKcal: hasData ? _nonNegative(burnedKcal.round()) : 0,
-      goalKcal: hasData ? goal : 0,
+      consumedKcal: hasData ? figures.supplied : 0,
+      burnedKcal: hasData ? figures.burned : 0,
+      goalKcal: hasData ? figures.goal : 0,
+      shownKcal: hasData ? figures.shown : 0,
+      isOver: hasData && figures.isOver,
     );
   }
 
@@ -90,9 +113,9 @@ class CalorieWidgetSnapshot {
     consumedKey: '$consumedKcal',
     burnedKey: '$burnedKcal',
     goalKey: '$goalKcal',
+    shownKey: '$shownKcal',
+    overKey: isOver ? '1' : '0',
   };
-
-  static int _nonNegative(int value) => value < 0 ? 0 : value;
 
   static int sanitiseOffsetMinutes(int offsetMinutes) {
     if (offsetMinutes < 0 || offsetMinutes >= 24 * 60) return 0;

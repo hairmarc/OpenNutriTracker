@@ -1,3 +1,4 @@
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -189,5 +190,39 @@ void main() {
     expect(rings.first.progressColor, Theme.of(context).colorScheme.primary);
     expect(rings.last.progressColor, const Color(0xFFB87410));
     expect(rings.last.startAngle, closeTo((800 - 200) / 2500 * 360, 0.001));
+  });
+
+  testWidgets('fractional totals print the widget whole numbers', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(500, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      _wrap(
+        const DashboardWidget(
+          totalKcalSupplied: 100.9,
+          totalKcalBurned: 50.9,
+          totalKcalDaily: 2000.2,
+          totalKcalLeft: 1899.3,
+          totalCarbsIntake: 10,
+          totalFatsIntake: 3,
+          totalProteinsIntake: 6,
+          totalCarbsGoal: 300,
+          totalFatsGoal: 55,
+          totalProteinsGoal: 75,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('100'), findsOneWidget);
+    expect(find.text('−50'), findsOneWidget);
+    expect(
+      tester
+          .widget<AnimatedFlipCounter>(find.byType(AnimatedFlipCounter))
+          .value,
+      1899,
+    );
   });
 }
